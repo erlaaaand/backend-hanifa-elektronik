@@ -7,7 +7,7 @@ import { FindUserByIdUseCase } from '../use-cases/find-user-by-id.use-case';
 import { FindUserByEmailUseCase } from '../use-cases/find-user-by-email.use-case';
 import { UpdateUserUseCase } from '../use-cases/update-user.use-case';
 import { UpdateAvatarUseCase } from '../use-cases/update-avatar.use-case';
-import { AdminCreateUserUseCase } from '../use-cases/admin-create-comitte-user.use-case';
+import { AdminCreateUserUseCase } from '../use-cases/admin-create-user.use-case';
 import { FindAllUsersUseCase } from '../use-cases/find-all-users.use-case';
 import { AdminCreateUserDto } from '../dto/admin-create-user.dto';
 import {
