@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Repository, DeepPartial } from 'typeorm';
 import { ICatalogRepository } from './catalog.repository.interface';
 import { CategoryEntity } from '../../domains/entities/category.entity';
 import { BrandEntity } from '../../domains/entities/brand.entity';
@@ -21,7 +21,7 @@ export class CatalogRepository implements ICatalogRepository {
   ) {}
 
   async createCategory(
-    category: Partial<CategoryEntity>,
+    category: DeepPartial<CategoryEntity>,
   ): Promise<CategoryEntity> {
     const newCat = this.categoryRepo.create(category);
     return this.categoryRepo.save(newCat);
@@ -33,7 +33,7 @@ export class CatalogRepository implements ICatalogRepository {
     return this.categoryRepo.findOne({ where: { id } });
   }
 
-  async createBrand(brand: Partial<BrandEntity>): Promise<BrandEntity> {
+  async createBrand(brand: DeepPartial<BrandEntity>): Promise<BrandEntity> {
     const newBrand = this.brandRepo.create(brand);
     return this.brandRepo.save(newBrand);
   }
@@ -44,7 +44,9 @@ export class CatalogRepository implements ICatalogRepository {
     return this.brandRepo.findOne({ where: { id } });
   }
 
-  async createProduct(product: Partial<ProductEntity>): Promise<ProductEntity> {
+  async createProduct(
+    product: DeepPartial<ProductEntity>,
+  ): Promise<ProductEntity> {
     const newProd = this.productRepo.create(product);
     return this.productRepo.save(newProd);
   }
@@ -84,7 +86,7 @@ export class CatalogRepository implements ICatalogRepository {
   }
 
   async createProductVariant(
-    variant: Partial<ProductVariantEntity>,
+    variant: DeepPartial<ProductVariantEntity>,
   ): Promise<ProductVariantEntity> {
     const newVar = this.variantRepo.create(variant);
     return this.variantRepo.save(newVar);

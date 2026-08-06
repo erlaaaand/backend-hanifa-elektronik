@@ -29,8 +29,7 @@ export class CreateProductUseCase {
       brandId: dto.brandId,
       specifications: dto.specifications,
       isActive: dto.isActive,
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-      variants: dto.variants as any,
+      variants: dto.variants,
     });
 
     const skus = dto.variants.map((v) => v.sku);

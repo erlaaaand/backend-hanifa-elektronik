@@ -16,8 +16,10 @@ export class CatalogExceptionFilter implements ExceptionFilter {
     const ctx = host.switchToHttp();
     const response = ctx.getResponse<Response>();
 
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
-    const code = (exception as any).code;
+    interface QueryFailedErrorWithCode extends QueryFailedError {
+      code?: string;
+    }
+    const code = (exception as unknown as QueryFailedErrorWithCode).code;
 
     // Check for MySQL Duplicate Entry (Error 1062)
     if (

@@ -4,4 +4,5 @@ import { IInventoryRepository } from './inventory.repository.interface';
 @Injectable()
 export class InventoryRepository implements IInventoryRepository {
   constructor() {}
+  ping(): boolean { return true; }
 }

@@ -1,3 +1,4 @@
+import { DeepPartial } from 'typeorm';
 import { CategoryEntity } from '../../domains/entities/category.entity';
 import { BrandEntity } from '../../domains/entities/brand.entity';
 import { ProductEntity } from '../../domains/entities/product.entity';
@@ -7,17 +8,19 @@ export const CATALOG_REPOSITORY_TOKEN = Symbol('CATALOG_REPOSITORY_TOKEN');
 
 export interface ICatalogRepository {
   // Category
-  createCategory(category: Partial<CategoryEntity>): Promise<CategoryEntity>;
+  createCategory(
+    category: DeepPartial<CategoryEntity>,
+  ): Promise<CategoryEntity>;
   findCategories(): Promise<CategoryEntity[]>;
   findCategoryById(id: string): Promise<CategoryEntity | null>;
 
   // Brand
-  createBrand(brand: Partial<BrandEntity>): Promise<BrandEntity>;
+  createBrand(brand: DeepPartial<BrandEntity>): Promise<BrandEntity>;
   findBrands(): Promise<BrandEntity[]>;
   findBrandById(id: string): Promise<BrandEntity | null>;
 
   // Product
-  createProduct(product: Partial<ProductEntity>): Promise<ProductEntity>;
+  createProduct(product: DeepPartial<ProductEntity>): Promise<ProductEntity>;
   findProducts(
     search?: string,
     page?: number,
@@ -28,6 +31,6 @@ export interface ICatalogRepository {
 
   // Variant
   createProductVariant(
-    variant: Partial<ProductVariantEntity>,
+    variant: DeepPartial<ProductVariantEntity>,
   ): Promise<ProductVariantEntity>;
 }
