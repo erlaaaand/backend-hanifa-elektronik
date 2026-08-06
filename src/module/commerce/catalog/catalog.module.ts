@@ -9,6 +9,15 @@ import { BrandEntity } from './domains/entities/brand.entity';
 import { ProductEntity } from './domains/entities/product.entity';
 import { ProductVariantEntity } from './domains/entities/product-variant.entity';
 
+// Use Cases
+import { CreateCategoryUseCase } from './applications/use-cases/create-category.use-case';
+import { FindCategoriesUseCase } from './applications/use-cases/find-categories.use-case';
+import { CreateBrandUseCase } from './applications/use-cases/create-brand.use-case';
+import { FindBrandsUseCase } from './applications/use-cases/find-brands.use-case';
+import { CreateProductUseCase } from './applications/use-cases/create-product.use-case';
+import { FindProductsUseCase } from './applications/use-cases/find-products.use-case';
+import { FindProductBySlugUseCase } from './applications/use-cases/find-product-by-slug.use-case';
+
 @Module({
   imports: [
     TypeOrmModule.forFeature([
@@ -20,6 +29,13 @@ import { ProductVariantEntity } from './domains/entities/product-variant.entity'
   ],
   controllers: [CatalogController],
   providers: [
+    CreateCategoryUseCase,
+    FindCategoriesUseCase,
+    CreateBrandUseCase,
+    FindBrandsUseCase,
+    CreateProductUseCase,
+    FindProductsUseCase,
+    FindProductBySlugUseCase,
     CatalogOrchestrator,
     {
       provide: CATALOG_REPOSITORY_TOKEN,
