@@ -110,7 +110,9 @@ async function bootstrap(): Promise<void> {
       sameSite: 'lax',
       secure: isProd,
       path: '/',
-      domain: isProd ? '.physicsfest.my.id' : undefined,
+      domain: isProd
+        ? configService.get<string>('COOKIE_DOMAIN') || undefined
+        : undefined,
     },
     getCsrfTokenFromRequest: (req: Request) => {
       const token = req.headers['x-csrf-token'];
@@ -165,8 +167,8 @@ async function bootstrap(): Promise<void> {
   // 9. Swagger Config
   if (!isProd) {
     const swaggerConfig = new DocumentBuilder()
-      .setTitle('Physics Festival 2026 API')
-      .setDescription('Dokumentasi API Physics Festival 2026')
+      .setTitle('Hanifa Elektronik API')
+      .setDescription('Dokumentasi REST API Hanifa Elektronik')
       .setVersion('1.0')
       .addBearerAuth(
         {

@@ -9,7 +9,13 @@ import {
   ThrottlerGuard,
   type ThrottlerModuleOptions,
 } from '@nestjs/throttler';
+import { ThrottlerStorageRedisService } from '@nest-lab/throttler-storage-redis';
+import { CacheModule } from '@nestjs/cache-manager';
+import KeyvRedis from '@keyv/redis';
+import { Redis } from 'ioredis';
 import { EventEmitterModule } from '@nestjs/event-emitter';
+
+import { MongooseModule } from '@nestjs/mongoose';
 
 // Import Validasi Environment
 import { validate } from './module/shared/config/env.validation';
@@ -20,6 +26,8 @@ import { UserModule } from './module/identity/users/user.module';
 import { StorageModule } from './module/shared/storage/storage.module';
 import { MailModule } from './module/shared/mail/mail.module';
 import { NotificationsModule } from './module/shared/notifications/notifications.module';
+import { AuditModule } from './module/shared/audit/audit.module';
+import { AuditInterceptor } from './module/shared/audit/interceptors/audit.interceptor';
 import { GlobalExceptionFilter } from './module/shared/common/filters/global-exception.filter';
 import { LoggingMiddleware } from './module/shared/common/middlewares/logging.middleware';
 
@@ -58,36 +66,78 @@ import { LoggingMiddleware } from './module/shared/common/middlewares/logging.mi
       },
     }),
 
-    // 3. Konfigurasi Rate Limiting (Throttler / Anti-Spam)
+    // 3. Konfigurasi MongoDB (Audit Trail & Compliance Logs)
+    MongooseModule.forRootAsync({
+      imports: [ConfigModule],
+      inject: [ConfigService],
+      useFactory: (configService: ConfigService) => {
+        const uri = configService.get<string>(
+          'MONGODB_URI',
+          'mongodb://localhost:27017/hanifa_elektronik_audit',
+        );
+        return {
+          uri,
+          serverSelectionTimeoutMS: 5000,
+        };
+      },
+    }),
+
+    // 4. Konfigurasi Rate Limiting (Throttler / Anti-DoS via Redis)
     ThrottlerModule.forRootAsync({
       imports: [ConfigModule],
       inject: [ConfigService],
-      useFactory: (configService: ConfigService): ThrottlerModuleOptions => ({
-        throttlers: [
-          {
-            // Default: fallback untuk semua endpoint yang tidak spesifik
-            name: 'default',
-            ttl: configService.get<number>('THROTTLE_TTL_DEFAULT', 60000),
-            limit: configService.get<number>('THROTTLE_LIMIT_DEFAULT', 1000),
-          },
-          {
-            // Strict: untuk endpoint sensitif (login, register, OTP)
-            name: 'strict',
-            ttl: configService.get<number>('THROTTLE_TTL_STRICT', 60000),
-            limit: configService.get<number>('THROTTLE_LIMIT_STRICT', 50),
-          },
-          {
-            // Dashboard: untuk aksi mutasi di area dashboard oleh user terautentikasi
-            // Sangat longgar — 500 request per menit per IP
-            name: 'dashboard',
-            ttl: configService.get<number>('THROTTLE_TTL_DASHBOARD', 60000),
-            limit: configService.get<number>('THROTTLE_LIMIT_DASHBOARD', 500),
-          },
-        ],
-      }),
+      useFactory: (configService: ConfigService): ThrottlerModuleOptions => {
+        const redisHost = configService.get<string>('REDIS_HOST', 'localhost');
+        const redisPort = configService.get<number>('REDIS_PORT', 6379);
+        const redisPassword = configService.get<string>('REDIS_PASSWORD', '');
+        const redis: Redis = new Redis({
+          host: redisHost,
+          port: redisPort,
+          password: redisPassword || undefined,
+          lazyConnect: true,
+        });
+
+        return {
+          storage: new ThrottlerStorageRedisService(redis),
+          throttlers: [
+            {
+              name: 'default',
+              ttl: configService.get<number>('THROTTLE_TTL_DEFAULT', 60000),
+              limit: configService.get<number>('THROTTLE_LIMIT_DEFAULT', 1000),
+            },
+            {
+              name: 'strict',
+              ttl: configService.get<number>('THROTTLE_TTL_STRICT', 60000),
+              limit: configService.get<number>('THROTTLE_LIMIT_STRICT', 50),
+            },
+            {
+              name: 'dashboard',
+              ttl: configService.get<number>('THROTTLE_TTL_DASHBOARD', 60000),
+              limit: configService.get<number>('THROTTLE_LIMIT_DASHBOARD', 500),
+            },
+          ],
+        };
+      },
     }),
 
-    // 4. Konfigurasi Event Emitter (Global)
+    // 5. Konfigurasi Caching Global via Redis
+    CacheModule.registerAsync({
+      isGlobal: true,
+      imports: [ConfigModule],
+      inject: [ConfigService],
+      useFactory: (configService: ConfigService) => {
+        const redisHost = configService.get<string>('REDIS_HOST', 'localhost');
+        const redisPort = configService.get<number>('REDIS_PORT', 6379);
+        const redisPassword = configService.get<string>('REDIS_PASSWORD', '');
+        const auth = redisPassword ? `:${redisPassword}@` : '';
+        return {
+          stores: [new KeyvRedis(`redis://${auth}${redisHost}:${redisPort}`)],
+          ttl: 60000,
+        };
+      },
+    }),
+
+    // 6. Konfigurasi Event Emitter (Global)
     EventEmitterModule.forRoot({
       wildcard: true,
       delimiter: '.',
@@ -98,7 +148,8 @@ import { LoggingMiddleware } from './module/shared/common/middlewares/logging.mi
       ignoreErrors: false,
     }),
 
-    // 5. Daftarkan Modul Fitur Aplikasi
+    // 7. Daftarkan Modul Fitur & Shared Aplikasi
+    AuditModule,
     AuthModule,
     UserModule,
     StorageModule,
@@ -122,6 +173,10 @@ import { LoggingMiddleware } from './module/shared/common/middlewares/logging.mi
     {
       provide: APP_INTERCEPTOR,
       useClass: TimeoutInterceptor,
+    },
+    {
+      provide: APP_INTERCEPTOR,
+      useClass: AuditInterceptor,
     },
   ],
 })
