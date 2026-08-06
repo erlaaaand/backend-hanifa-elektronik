@@ -135,7 +135,14 @@ async function bootstrap(): Promise<void> {
   });
 
   // Terapkan middleware CSRF untuk semua rute NestJS
-  app.use(doubleCsrfProtection);
+  // (Otomatis BYPASS jika request menggunakan Authorization: Bearer <token> untuk Mobile App / API Client)
+  app.use((req: Request, res: Response, next: NextFunction) => {
+    const authHeader = req.headers.authorization;
+    if (authHeader && authHeader.startsWith('Bearer ')) {
+      return next();
+    }
+    doubleCsrfProtection(req, res, next);
+  });
 
   // 7. CSRF Error Handler
   app.use((err: unknown, req: Request, res: Response, next: NextFunction) => {
