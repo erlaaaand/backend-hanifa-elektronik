@@ -34,13 +34,15 @@ export class CreateUserDto {
   @MaxLength(20)
   phoneNumber: string = '';
 
-  @IsString()
-  @IsNotEmpty({ message: 'Asal institusi wajib diisi' })
-  @MaxLength(255)
-  institution: string = '';
-
-  @IsString()
   @IsOptional()
-  @MaxLength(20)
-  npsn?: string;
+  otpCode?: string;
+
+  @IsOptional()
+  otpExpiresAt?: Date;
+
+  @IsOptional()
+  isEmailVerified?: boolean;
+
+  @IsOptional()
+  isActive?: boolean;
 }

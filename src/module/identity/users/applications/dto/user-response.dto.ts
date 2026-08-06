@@ -36,19 +36,6 @@ export class UserResponseDto {
   phoneNumber: string = '';
 
   @ApiProperty({
-    example: 'SMA Negeri 1',
-    description: 'Asal sekolah/instansi',
-  })
-  institution: string = '';
-
-  @ApiPropertyOptional({
-    example: '12345678',
-    nullable: true,
-    description: 'NPSN sekolah',
-  })
-  npsn: string | null = null;
-
-  @ApiProperty({
     example: 'PARTICIPANT',
     description: 'Role user',
   })

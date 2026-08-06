@@ -46,10 +46,6 @@ export class UpdateUserUseCase {
       updatePayload.fullName = dto.fullName ?? null;
     }
 
-    if (dto.institution !== undefined) {
-      updatePayload.institution = dto.institution ?? null;
-    }
-
     if (dto.newPassword || dto.currentPassword) {
       if (!dto.newPassword || !dto.currentPassword) {
         throw new BadRequestException(

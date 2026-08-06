@@ -68,16 +68,19 @@ export class MailService implements OnModuleInit {
   async sendOtpEmail(to: string, name: string, otp: string): Promise<void> {
     try {
       const sender = this.configService.get<string>('EMAIL_USER');
+      const appName =
+        this.configService.get<string>('EMAIL_FROM_NAME') ||
+        'Hanifa Elektronik';
 
       await this.transporter.sendMail({
-        from: `"Physics Festival XXV" <${sender}>`,
+        from: `"${appName}" <${sender}>`,
         to,
-        subject: 'Kode Verifikasi Physics Festival XXV',
+        subject: `Kode Verifikasi Akun ${appName}`,
         html: `
           <div style="font-family:Arial,sans-serif">
             <h2>Halo ${name}</h2>
 
-            <p>Terima kasih telah mendaftar di Physics Festival XXV.</p>
+            <p>Terima kasih telah mendaftar di ${appName}.</p>
 
             <p>Gunakan kode OTP berikut:</p>
 
@@ -119,11 +122,14 @@ export class MailService implements OnModuleInit {
   ): Promise<void> {
     try {
       const sender = this.configService.get<string>('EMAIL_USER');
+      const appName =
+        this.configService.get<string>('EMAIL_FROM_NAME') ||
+        'Hanifa Elektronik';
 
       await this.transporter.sendMail({
-        from: `"Physics Festival XXV" <${sender}>`,
+        from: `"${appName}" <${sender}>`,
         to,
-        subject: 'Kode Reset Password Physics Festival XXV',
+        subject: `Kode Reset Password ${appName}`,
         html: `
           <div style="font-family:Arial,sans-serif">
             <h2>Halo ${name}</h2>

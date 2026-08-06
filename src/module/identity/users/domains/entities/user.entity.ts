@@ -4,6 +4,7 @@ import {
   Column,
   CreateDateColumn,
   Entity,
+  Index,
   OneToMany,
   PrimaryColumn,
   type Relation,
@@ -48,16 +49,12 @@ export class UserEntity {
   @Column({ type: 'varchar', length: 20, nullable: false })
   phoneNumber: string = '';
 
-  @Column({ type: 'varchar', length: 255, nullable: false })
-  institution: string = '';
-
-  @Column({ type: 'varchar', length: 20, nullable: true })
-  npsn: string | null = null;
-
   // ── Status & Role ────────────────────────────────────────────
+  @Index()
   @Column({ type: 'boolean', default: true })
   isActive: boolean = true;
 
+  @Index()
   @Column({
     type: 'enum',
     enum: UserRole,

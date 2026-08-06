@@ -25,8 +25,8 @@ export class AdminCreateUserUseCase {
     dto: AdminCreateUserDto,
   ): Promise<{ message: string; userId: string }> {
     // 1. Cek apakah email sudah terdaftar
-    const existingUser = await this.userRepo.findComitteByEmail(dto.email);
-    if (existingUser) {
+    const emailExists = await this.userRepo.existsByEmail(dto.email);
+    if (emailExists) {
       throw new ConflictException('Email sudah terdaftar di sistem.');
     }
 

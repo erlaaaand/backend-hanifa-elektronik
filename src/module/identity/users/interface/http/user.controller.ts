@@ -42,6 +42,12 @@ import {
   UserRole,
 } from '../../applications/dto/admin-create-user.dto';
 import { Roles } from '../../../auth/interface/decorators/roles.decorator';
+import { Audit } from '../../../../shared/audit/decorators/audit.decorator';
+import {
+  AuditAction,
+  AuditCategory,
+  AuditSeverity,
+} from '../../../../shared/audit/domains/enums/audit.enum';
 
 @ApiTags('Identity - Users')
 @ApiBearerAuth('JWT')
@@ -52,6 +58,13 @@ export class UserController {
   constructor(private readonly orchestrator: UserOrchestrator) {}
 
   @Throttle({ dashboard: {} })
+  @Audit({
+    action: AuditAction.USER_CREATE,
+    category: AuditCategory.EMPLOYEE,
+    resource: 'User',
+    severity: AuditSeverity.WARNING,
+    description: 'Admin membuat akun pengguna/karyawan baru langsung aktif',
+  })
   @Post('admin/create')
   @HttpCode(HttpStatus.CREATED)
   @Roles(UserRole.ADMIN)
@@ -99,41 +112,6 @@ export class UserController {
       role: role || undefined,
       search: search || undefined,
     });
-  }
-
-  @SkipThrottle()
-  @Get('search')
-  @HttpCode(HttpStatus.OK)
-  @ApiOperation({
-    summary: 'Mencari peserta berdasarkan email (untuk tambah anggota tim)',
-  })
-  @ApiOkResponse({
-    description: 'Berhasil mencari peserta',
-    type: [UserResponseDto],
-  })
-  async searchParticipants(
-    @Query('q') query: string,
-  ): Promise<UserResponseDto[]> {
-    return this.orchestrator.searchParticipants(query);
-  }
-
-  // ── GET /users/institution-peers ───────────────────────────────────────────
-
-  @SkipThrottle()
-  @Get('institution-peers')
-  @HttpCode(HttpStatus.OK)
-  @Roles(UserRole.CUSTOMER)
-  @ApiOperation({
-    summary: 'Mendapatkan daftar peserta dengan NPSN / Institusi yang sama',
-  })
-  @ApiOkResponse({
-    description: 'Berhasil mendapatkan daftar peserta satu institusi',
-    type: [UserResponseDto],
-  })
-  async getInstitutionPeers(
-    @CurrentUser('sub') userId: string,
-  ): Promise<UserResponseDto[]> {
-    return this.orchestrator.getInstitutionPeers(userId);
   }
 
   // ── GET /users/me ──────────────────────────────────────────────────────────

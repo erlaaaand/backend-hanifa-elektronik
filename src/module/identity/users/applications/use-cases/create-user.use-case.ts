@@ -40,8 +40,10 @@ export class CreateUserUseCase {
       password: hashedPassword,
       fullName: dto.fullName ?? undefined,
       phoneNumber: dto.phoneNumber,
-      institution: dto.institution,
-      npsn: dto.npsn ?? null,
+      otpCode: dto.otpCode ?? null,
+      otpExpiresAt: dto.otpExpiresAt ?? null,
+      isEmailVerified: dto.isEmailVerified ?? false,
+      isActive: dto.isActive ?? true,
     });
 
     this.eventEmitter.emit(

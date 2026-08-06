@@ -43,7 +43,7 @@ export class NotificationsService {
     return saved;
   }
 
-  // 1b. Mengirim notifikasi berdasarkan role (misal: ADMIN, COMMITTEE)
+  // 1b. Mengirim notifikasi berdasarkan role (misal: ADMIN, CUSTOMER)
   async sendToRoles(
     roles: UserRole[],
     dto: Omit<CreateNotificationDto, 'userId'>,

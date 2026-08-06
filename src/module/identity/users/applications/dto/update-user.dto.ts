@@ -20,26 +20,6 @@ export class UpdateUserDto {
   fullName?: string;
 
   @ApiPropertyOptional({
-    description: 'Asal Sekolah/Instansi (opsional).',
-    example: 'Universitas Indonesia',
-    maxLength: 150,
-  })
-  @IsString()
-  @IsOptional()
-  @MaxLength(150)
-  institution?: string;
-
-  @ApiPropertyOptional({
-    description: 'NPSN Sekolah (opsional).',
-    example: '12345678',
-    maxLength: 20,
-  })
-  @IsString()
-  @IsOptional()
-  @MaxLength(20)
-  npsn?: string;
-
-  @ApiPropertyOptional({
     description: 'Password saat ini — wajib jika ingin mengganti password.',
     example: 'OldPass123',
     minLength: 8,

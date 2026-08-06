@@ -53,9 +53,9 @@ export class StorageController {
   @UseGuards(FileSizeGuard)
   @UseInterceptors(FileUploadInterceptor)
   @ApiOperation({
-    summary: 'Upload berkas Physics Festival',
+    summary: 'Upload berkas / media',
     description:
-      'Upload file persyaratan untuk pendaftaran lomba (Bukti Pembayaran, Poster, Karya Tulis, dll).\n\n' +
+      'Upload file gambar atau dokumen (Produk, Avatar, Bukti Pembayaran, dll).\n\n' +
       '**Format yang didukung:** JPG, PNG, WebP, PDF\n\n' +
       '**Ukuran maksimum:** 20MB\n\n' +
       '`userId` diambil otomatis dari JWT — tidak perlu dikirim di body.\n\n' +

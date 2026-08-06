@@ -1,14 +1,13 @@
 // src/users/infrastructures/repositories/user.repository.ts
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, ILike } from 'typeorm';
+import { Repository } from 'typeorm';
 import { UserEntity } from '../../domains/entities/user.entity';
 import {
   IUserRepository,
   type FindAllUsersQuery,
   type PaginatedResult,
 } from './user.repository.interface';
-import { UserRole } from '../../../users/domains/entities/user.entity';
 
 @Injectable()
 export class UserRepository implements IUserRepository {
@@ -50,7 +49,7 @@ export class UserRepository implements IUserRepository {
     const qb = this.ormRepo.createQueryBuilder('user').where('1=1');
 
     if (search) {
-      qb.andWhere('(user.fullName ILIKE :search OR user.email ILIKE :search)', {
+      qb.andWhere('(user.fullName LIKE :search OR user.email LIKE :search)', {
         search: `%${search}%`,
       });
     }
@@ -100,44 +99,5 @@ export class UserRepository implements IUserRepository {
 
   async save(user: UserEntity): Promise<UserEntity> {
     return this.ormRepo.save(user);
-  }
-
-  async findComitteByEmail(email: string): Promise<UserEntity | null> {
-    return this.ormRepo.findOne({ where: { email, role: UserRole.CUSTOMER } });
-  }
-
-  async searchParticipants(query: string): Promise<UserEntity[]> {
-    return this.ormRepo.find({
-      where: {
-        role: UserRole.CUSTOMER,
-        email: ILike(`%${query}%`),
-      },
-      take: 10,
-    });
-  }
-
-  async findInstitutionPeers(
-    userId: string,
-    npsn: string | null,
-    institution: string,
-  ): Promise<UserEntity[]> {
-    const qb = this.ormRepo
-      .createQueryBuilder('user')
-      .where('user.role = :role', { role: UserRole.CUSTOMER })
-      .andWhere('user.id != :userId', { userId })
-      .andWhere('user.isActive = :isActive', { isActive: true });
-
-    if (npsn) {
-      // Prioritize NPSN if available, fallback to institution if not strictly matching? No, the user says "satu institusi dan satu npsn"
-      // Wait, if NPSN is provided, we can match exactly on NPSN.
-      qb.andWhere('(user.npsn = :npsn OR user.institution = :institution)', {
-        npsn,
-        institution,
-      });
-    } else {
-      qb.andWhere('user.institution = :institution', { institution });
-    }
-
-    return qb.take(20).getMany();
   }
 }
