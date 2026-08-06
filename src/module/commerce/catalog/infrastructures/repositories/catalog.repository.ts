@@ -27,7 +27,7 @@ export class CatalogRepository implements ICatalogRepository {
     return this.categoryRepo.save(newCat);
   }
   async findCategories(): Promise<CategoryEntity[]> {
-    return this.categoryRepo.find({ relations: ['children'] });
+    return this.categoryRepo.find({ relations: { children: true } });
   }
   async findCategoryById(id: string): Promise<CategoryEntity | null> {
     return this.categoryRepo.findOne({ where: { id } });
@@ -73,13 +73,13 @@ export class CatalogRepository implements ICatalogRepository {
   async findProductBySlug(slug: string): Promise<ProductEntity | null> {
     return this.productRepo.findOne({
       where: { slug },
-      relations: ['category', 'brand', 'variants'],
+      relations: { category: true, brand: true, variants: true },
     });
   }
   async findProductById(id: string): Promise<ProductEntity | null> {
     return this.productRepo.findOne({
       where: { id },
-      relations: ['category', 'brand', 'variants'],
+      relations: { category: true, brand: true, variants: true },
     });
   }
 

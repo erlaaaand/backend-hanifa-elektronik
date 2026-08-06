@@ -18,6 +18,9 @@ import { CreateProductUseCase } from './applications/use-cases/create-product.us
 import { FindProductsUseCase } from './applications/use-cases/find-products.use-case';
 import { FindProductBySlugUseCase } from './applications/use-cases/find-product-by-slug.use-case';
 
+// Events & Listeners
+import { CatalogListener } from './applications/listeners/catalog.listener';
+
 @Module({
   imports: [
     TypeOrmModule.forFeature([
@@ -37,6 +40,7 @@ import { FindProductBySlugUseCase } from './applications/use-cases/find-product-
     FindProductsUseCase,
     FindProductBySlugUseCase,
     CatalogOrchestrator,
+    CatalogListener,
     {
       provide: CATALOG_REPOSITORY_TOKEN,
       useClass: CatalogRepository,

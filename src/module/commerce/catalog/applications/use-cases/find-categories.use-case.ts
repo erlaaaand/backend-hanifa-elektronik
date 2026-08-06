@@ -1,7 +1,7 @@
 import { Inject, Injectable } from '@nestjs/common';
 import {
   CATALOG_REPOSITORY_TOKEN,
-  ICatalogRepository,
+  type ICatalogRepository,
 } from '../../infrastructures/repositories/catalog.repository.interface';
 
 @Injectable()

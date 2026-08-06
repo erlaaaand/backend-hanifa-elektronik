@@ -38,7 +38,12 @@ import {
   AuditSeverity,
 } from '../../../../shared/audit/domains/enums/audit.enum';
 
+// Exception Filter
+import { UseFilters } from '@nestjs/common';
+import { CatalogExceptionFilter } from '../filters/catalog-exception.filter';
+
 @ApiTags('Commerce - Catalog')
+@UseFilters(CatalogExceptionFilter)
 @Controller('catalog')
 export class CatalogController {
   constructor(private readonly orchestrator: CatalogOrchestrator) {}

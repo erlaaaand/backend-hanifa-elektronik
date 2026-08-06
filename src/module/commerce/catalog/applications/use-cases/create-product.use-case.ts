@@ -1,15 +1,18 @@
 import { Inject, Injectable, NotFoundException } from '@nestjs/common';
+import { EventEmitter2 } from '@nestjs/event-emitter';
 import {
   CATALOG_REPOSITORY_TOKEN,
-  ICatalogRepository,
+  type ICatalogRepository,
 } from '../../infrastructures/repositories/catalog.repository.interface';
 import { CreateProductDto } from '../dto/create-product.dto';
+import { ProductCreatedEvent } from '../events/catalog.events';
 
 @Injectable()
 export class CreateProductUseCase {
   constructor(
     @Inject(CATALOG_REPOSITORY_TOKEN)
     private readonly catalogRepo: ICatalogRepository,
+    private readonly eventEmitter: EventEmitter2,
   ) {}
   async execute(dto: CreateProductDto) {
     const category = await this.catalogRepo.findCategoryById(dto.categoryId);
@@ -18,7 +21,7 @@ export class CreateProductUseCase {
     const slug =
       dto.name.toLowerCase().replace(/[^a-z0-9]+/g, '-') + '-' + Date.now();
 
-    return this.catalogRepo.createProduct({
+    const savedProduct = await this.catalogRepo.createProduct({
       name: dto.name,
       description: dto.description,
       slug,
@@ -29,5 +32,13 @@ export class CreateProductUseCase {
       // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
       variants: dto.variants as any,
     });
+
+    const skus = dto.variants.map((v) => v.sku);
+    this.eventEmitter.emit(
+      'catalog.product.created',
+      new ProductCreatedEvent(savedProduct.id, savedProduct.name, skus),
+    );
+
+    return savedProduct;
   }
 }
