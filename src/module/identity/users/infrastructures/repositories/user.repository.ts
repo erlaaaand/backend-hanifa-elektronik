@@ -1,0 +1,143 @@
+// src/users/infrastructures/repositories/user.repository.ts
+import { Injectable } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository, ILike } from 'typeorm';
+import { UserEntity } from '../../domains/entities/user.entity';
+import {
+  IUserRepository,
+  type FindAllUsersQuery,
+  type PaginatedResult,
+} from './user.repository.interface';
+import { UserRole } from '../../../users/domains/entities/user.entity';
+
+@Injectable()
+export class UserRepository implements IUserRepository {
+  constructor(
+    @InjectRepository(UserEntity)
+    private readonly ormRepo: Repository<UserEntity>,
+  ) {}
+
+  async findById(id: string): Promise<UserEntity | null> {
+    return this.ormRepo.findOne({ where: { id } });
+  }
+
+  async findByIdWithPassword(id: string): Promise<UserEntity | null> {
+    return this.ormRepo
+      .createQueryBuilder('user')
+      .addSelect('user.password')
+      .where('user.id = :id', { id })
+      .getOne();
+  }
+
+  async findByEmail(email: string): Promise<UserEntity | null> {
+    return this.ormRepo
+      .createQueryBuilder('user')
+      .addSelect('user.password')
+      .where('user.email = :email', { email })
+      .getOne();
+  }
+
+  async findAll(): Promise<UserEntity[]> {
+    return this.ormRepo.find({ where: { isActive: true } });
+  }
+
+  async findAllPaginated(
+    query: FindAllUsersQuery,
+  ): Promise<PaginatedResult<UserEntity>> {
+    const { page = 1, limit = 10, role, search } = query;
+    const skip = (page - 1) * limit;
+
+    const qb = this.ormRepo.createQueryBuilder('user').where('1=1');
+
+    if (search) {
+      qb.andWhere('(user.fullName ILIKE :search OR user.email ILIKE :search)', {
+        search: `%${search}%`,
+      });
+    }
+
+    if (role) {
+      qb.andWhere('user.role = :role', { role });
+    }
+
+    const [data, total] = await qb
+      .orderBy('user.role', 'ASC')
+      .addOrderBy('user.fullName', 'ASC')
+      .skip(skip)
+      .take(limit)
+      .getManyAndCount();
+
+    return {
+      data,
+      total,
+      page,
+      limit,
+      totalPages: Math.ceil(total / limit),
+    };
+  }
+
+  async create(data: Partial<UserEntity>): Promise<UserEntity> {
+    const user = this.ormRepo.create(data);
+    return this.ormRepo.save(user);
+  }
+
+  async update(id: string, data: Partial<UserEntity>): Promise<UserEntity> {
+    await this.ormRepo.update(id, data);
+    const updated = await this.findById(id);
+    if (!updated) {
+      throw new Error(`User dengan id ${id} tidak ditemukan setelah update`);
+    }
+    return updated;
+  }
+
+  async softDelete(id: string): Promise<void> {
+    await this.ormRepo.update(id, { isActive: false });
+  }
+
+  async existsByEmail(email: string): Promise<boolean> {
+    const count = await this.ormRepo.count({ where: { email } });
+    return count > 0;
+  }
+
+  async save(user: UserEntity): Promise<UserEntity> {
+    return this.ormRepo.save(user);
+  }
+
+  async findComitteByEmail(email: string): Promise<UserEntity | null> {
+    return this.ormRepo.findOne({ where: { email, role: UserRole.CUSTOMER } });
+  }
+
+  async searchParticipants(query: string): Promise<UserEntity[]> {
+    return this.ormRepo.find({
+      where: {
+        role: UserRole.CUSTOMER,
+        email: ILike(`%${query}%`),
+      },
+      take: 10,
+    });
+  }
+
+  async findInstitutionPeers(
+    userId: string,
+    npsn: string | null,
+    institution: string,
+  ): Promise<UserEntity[]> {
+    const qb = this.ormRepo
+      .createQueryBuilder('user')
+      .where('user.role = :role', { role: UserRole.CUSTOMER })
+      .andWhere('user.id != :userId', { userId })
+      .andWhere('user.isActive = :isActive', { isActive: true });
+
+    if (npsn) {
+      // Prioritize NPSN if available, fallback to institution if not strictly matching? No, the user says "satu institusi dan satu npsn"
+      // Wait, if NPSN is provided, we can match exactly on NPSN.
+      qb.andWhere('(user.npsn = :npsn OR user.institution = :institution)', {
+        npsn,
+        institution,
+      });
+    } else {
+      qb.andWhere('user.institution = :institution', { institution });
+    }
+
+    return qb.take(20).getMany();
+  }
+}
