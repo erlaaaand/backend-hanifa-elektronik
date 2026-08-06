@@ -37,6 +37,12 @@ import { JwtAuthGuard } from '../guards/jwt-auth.guard';
 import { Public } from '../decorators/public.decorator';
 import { CurrentUser } from '../decorators/current-user.decorator';
 import { AuthenticatedUser } from '../../domains/entities/jwt-payload.entity';
+import { Audit } from '../../../../shared/audit/decorators/audit.decorator';
+import {
+  AuditAction,
+  AuditCategory,
+  AuditSeverity,
+} from '../../../../shared/audit/domains/enums/audit.enum';
 
 @ApiTags('Auth')
 @ApiBearerAuth('JWT')
@@ -49,6 +55,13 @@ export class AuthController {
   // ── Register ───────────────────────────────────────────────────────────────
 
   @Public()
+  @Audit({
+    action: AuditAction.AUTH_REGISTER,
+    category: AuditCategory.AUTH,
+    resource: 'User',
+    severity: AuditSeverity.INFO,
+    description: 'Pendaftaran akun pengguna baru',
+  })
   @Post('register')
   @HttpCode(HttpStatus.CREATED)
   @Throttle({ strict: { limit: 100, ttl: 60_000 } })
@@ -101,6 +114,13 @@ export class AuthController {
   // ── Login ──────────────────────────────────────────────────────────────────
 
   @Public()
+  @Audit({
+    action: AuditAction.AUTH_LOGIN,
+    category: AuditCategory.AUTH,
+    resource: 'User',
+    severity: AuditSeverity.INFO,
+    description: 'User login attempt',
+  })
   @Post('login')
   @HttpCode(HttpStatus.OK)
   @Throttle({ strict: { limit: 100, ttl: 60_000 } })
@@ -148,7 +168,7 @@ export class AuthController {
       path: '/',
       domain:
         process.env.NODE_ENV === 'production'
-          ? '.physicsfest.my.id'
+          ? process.env.COOKIE_DOMAIN || undefined
           : undefined,
       maxAge: 7 * 24 * 60 * 60 * 1000, // 7 Hari
     });
@@ -223,7 +243,7 @@ export class AuthController {
       path: '/',
       domain:
         process.env.NODE_ENV === 'production'
-          ? '.physicsfest.my.id'
+          ? process.env.COOKIE_DOMAIN || undefined
           : undefined,
       maxAge: 0, // maxAge 0 akan menghancurkan cookie
     };
@@ -277,7 +297,7 @@ export class AuthController {
       path: '/',
       domain:
         process.env.NODE_ENV === 'production'
-          ? '.physicsfest.my.id'
+          ? process.env.COOKIE_DOMAIN || undefined
           : undefined,
       maxAge: 7 * 24 * 60 * 60 * 1000, // 7 Hari
     });

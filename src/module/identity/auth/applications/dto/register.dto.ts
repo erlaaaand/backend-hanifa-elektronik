@@ -63,7 +63,7 @@ export class RegisterDto {
   @MaxLength(100, { message: 'Nama maksimal 100 karakter' })
   fullName: string = '';
 
-  // ── TAMBAHAN BARU UNTUK PHYSICS FESTIVAL ──
+  // ── Kontak Pengguna ──
 
   @ApiProperty({
     description: 'Nomor WhatsApp aktif peserta.',
@@ -74,23 +74,4 @@ export class RegisterDto {
   @IsNotEmpty({ message: 'Nomor telepon wajib diisi' })
   @MaxLength(20)
   phoneNumber: string = '';
-
-  @ApiProperty({
-    description: 'Asal instansi atau sekolah (SMA/SMK/MA sederajat).',
-    example: 'SMA N 1 Padang',
-    maxLength: 255,
-  })
-  @IsString({ message: 'Asal institusi harus berupa teks' })
-  @IsNotEmpty({ message: 'Asal institusi wajib diisi' })
-  @MaxLength(255)
-  institution: string = '';
-
-  @ApiPropertyOptional({
-    description: 'NPSN sekolah untuk mempermudah pencarian tim.',
-    example: '12345678',
-    maxLength: 20,
-  })
-  @IsString({ message: 'NPSN harus berupa teks' })
-  @MaxLength(20)
-  npsn?: string;
 }
