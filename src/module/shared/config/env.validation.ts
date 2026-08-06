@@ -41,6 +41,10 @@ class EnvironmentVariables {
   @IsOptional()
   CORS_ORIGINS?: string;
 
+  @IsString()
+  @IsOptional()
+  COOKIE_DOMAIN?: string;
+
   // ── Database (MySQL) ─────────────────────────────────────────
   @IsString()
   @IsNotEmpty({ message: 'DB_HOST wajib diisi' })
@@ -61,7 +65,7 @@ class EnvironmentVariables {
 
   @IsString()
   @IsNotEmpty({ message: 'DB_DATABASE wajib diisi' })
-  DB_DATABASE: string = 'physics_festival_db'; // Disesuaikan dengan project
+  DB_DATABASE: string = 'hanifa_elektronik_db';
 
   @IsNumber()
   @Min(1)
@@ -83,11 +87,11 @@ class EnvironmentVariables {
 
   @IsString()
   @IsNotEmpty({ message: 'JWT_ISSUER wajib diisi' })
-  JWT_ISSUER: string = 'physics-festival-backend'; // Disesuaikan
+  JWT_ISSUER: string = 'hanifa-elektronik-backend';
 
   @IsString()
   @IsNotEmpty({ message: 'JWT_AUDIENCE wajib diisi' })
-  JWT_AUDIENCE: string = 'physics-festival-client'; // Disesuaikan
+  JWT_AUDIENCE: string = 'hanifa-elektronik-client';
 
   // ── Storage ──────────────────────────────────────────────────
   @IsString()
@@ -119,6 +123,10 @@ class EnvironmentVariables {
   @IsNotEmpty({ message: 'EMAIL_PASS wajib diisi' })
   EMAIL_PASS: string = 'your_email_password';
 
+  @IsString()
+  @IsOptional()
+  EMAIL_FROM_NAME: string = 'Hanifa Elektronik';
+
   // ── Throttler ────────────────────────────────────────────────
   @IsNumber()
   @Min(1000)
@@ -139,6 +147,28 @@ class EnvironmentVariables {
   @Min(1)
   @IsOptional()
   THROTTLE_LIMIT_STRICT: number = 10;
+
+  // ── Redis ──────────────────────────────────────────────────
+  @IsString()
+  @IsOptional()
+  REDIS_HOST: string = 'localhost';
+
+  @IsNumber()
+  @IsOptional()
+  REDIS_PORT: number = 6379;
+
+  @IsString()
+  @IsOptional()
+  REDIS_PASSWORD?: string;
+
+  // ── MongoDB (Audit Trail & Compliance Logs) ────────────────
+  @IsString()
+  @IsOptional()
+  MONGODB_URI: string = 'mongodb://localhost:27017/hanifa_elektronik_audit';
+
+  @IsBoolean()
+  @IsOptional()
+  AUDIT_LOG_ENABLED: boolean = true;
 }
 
 export function validate(
