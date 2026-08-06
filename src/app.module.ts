@@ -31,6 +31,9 @@ import { AuditInterceptor } from './module/shared/audit/interceptors/audit.inter
 import { GlobalExceptionFilter } from './module/shared/common/filters/global-exception.filter';
 import { LoggingMiddleware } from './module/shared/common/middlewares/logging.middleware';
 
+import { CatalogModule } from './module/commerce/catalog/catalog.module';
+import { InventoryModule } from './module/commerce/inventory/inventory.module';
+
 @Module({
   imports: [
     // 1. Konfigurasi Environment (Global)
@@ -152,6 +155,8 @@ import { LoggingMiddleware } from './module/shared/common/middlewares/logging.mi
     AuditModule,
     AuthModule,
     UserModule,
+    CatalogModule,
+    InventoryModule,
     StorageModule,
     MailModule,
     NotificationsModule,
